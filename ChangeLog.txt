@@ -1,0 +1,81 @@
+
+******************************************************
+	Change Log:
+******************************************************
+	Version - 191010 (10/10/19)
+		modification: moved User Settings to the MW_Settings_1280x720.ahk
+			now all user edits should be in the MW_Settings_1280x720.ahk file vs MadWizard.ahk
+		bug fix: corrected error where Formation to use (Q/W/E) was ignoring the Keyboard Override functionality
+		bug fix: corrected error where script was finding wrong town (due to Update/Player progression)
+		bug fix: corrected issue where 1st familiar was not always being placed
+		added option: to minimize flashing when placing familiars (due to Update on how familiar placement)
+		added setting: to set which champs are targeted for Early Priority Leveling (ie deeking/shandi/minsc)
+		correction: Vajra should be spelled correctly		
+		(thx Neal for several of these issues)
+	Version - 191001 (10/01/19)
+		bug fix: corrected issues with Find First Mob (had incorrect variable names)
+		bug fix: modified FindTown function (should now find correct town regardless of game progression)
+		modified a couple of PixelSearch's (town and adventure select positions)
+			once found the script will remember for the next iteration/adventure run 
+		added option to enable mousing sweeping for < 3 familiars 
+			(this is optional as script takes even more control over the mouse when running)
+		added option to enable auto-clicks 
+			(this is optional as appears to desired when running a lower FPS)			
+		added setting to stop leveling champs after a specific zone is reached
+	Version - 190830 (08/30/19)
+		added Clock that updates on each Zone
+		added Patron Detection
+		re-worked Town Clicks - should now find towns without needing to tweak settings
+			NOTE: un-tested for newer players who only have 1 or 2 towns unlocked
+		re-worked Mad Wizard Selection/Start - should no longer need to update settings when Mad Wizard moves in the list 
+			(completing variants/toggling of Hide Completed/Locked options)
+		added option for the Script use F-keys or Mouse when leveling Champions
+		extended functionality of the Champion-Specialization Settings to allow for different values based on Patron
+		advance users - see [SPECIAL LEVELING ON z1] (around line 1018 in MadWizard.ahk)
+			can modify which champs get priority leveling on z1
+			can set different champs for different patrons
+			
+	Version - 190829 (08/29/19)
+		added Shandi and Minsc to early leveling
+		added Current Run Time to Display
+		corrected errors resulting from UI tweaks
+		CRITICAL: modified adventure selection to a Fixed Position 
+			-> this means will have to update its X/Y values 
+			-> with changes to available normal/patron variants
+			-> MORE INFO SEE Setting File -> Search [ CRITICAL - IMPORTANT ]
+		NEW PLAYER NOTE: 
+			-> the X/Y values for the Towns are no longer valid (town_x1/y1 and town_x2/y2)
+			-> no longer able to test these values to update correctly
+			-> can use WindowSpy or F6 (built in function) to get the X/Y values for your screen and update Settings file accordingly
+			-> discord community also good source for help
+	Version - 190104 (01/04/19)
+		modified new run start check - will wait for up to 1 min for mob to come screen before continuing - resets and trys again otherwise
+		add a sweep function if Familiar Count < 3 to speed up initil gold collection
+		removed Error Tooltip for failing to find ClickDamage Button was causing reset issues on World Map
+	Version - 12/01
+		modified Familiar Placement to use F+Click function
+	Version - 11/27
+		bug fix corrected timing bug for finding sliding Adventure Complete Button
+	Version - 11/26
+		bug fix if set Familiars > 6 (still only places up to 6 familiars in the field)
+		modified how script finds the Reset Complete Complete should better handle modifications to this window (CNE modified the window for HR Event currently back in original design)
+		bug fix added code to account for users whose Window Title Bars are slightly bigger then what script was coded for
+		NOTE: code for High Rollers was NOT removed in case a similar event returns (a modification should allow for better handling of the 1 known UI issue during such event)
+	Version - 11/05
+		modified transition checks for the sliding black.. to begin when 1st appears on left of screen and waits till clears the right of screen
+		modified formation updates to only update after leveling is completed (to minimize number of times this is called as this is tied to a hitching issue)
+	Version - 10/01
+		corrected bug in auto run HR Levels not working
+		updated setting values for  town_x/y2 in MW_Settings_1366x768.ahk (thx H3llscr3am)		
+	Version - 9/30
+		added feature to auto run HR Levels at designated hour (local) 
+			NOTE: its turned off by default - more less to prompt user to set the Desired Hour at same time enabling this feature
+	Version - 9/29 
+		altered champ leveling to level up every other champ on odd vs even levels
+		modifications to compensate for UI changes to the Champ Roster Buttons
+		added additional checks for handling Specialization Windows
+		added additional Settings to allow for different Formation/Specialization Options
+		modified how the position of the MadWizard FreePlay is determined in the Adventure Select Window
+		modified how the position of the MadWizard town is determined (attempting to simplify setup process)
+	Version - 9/28
+		added functionality to switch formations while the Script is running
