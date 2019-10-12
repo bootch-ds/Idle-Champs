@@ -115,14 +115,14 @@ return
 	{
 		;TestWindowSettings()
 		;TestFindWorldMap()
-		;TestFindPatron()
+		TestFindPatron()
 		;TestFindTown()
 		;TestTownLocations()
 		;TestAdventureSelect()
 		;TestFindMob()		
 		;TestAutoProgress()	
 		;DoFamiliars(6)
-		DoEarlyLeveling()
+		;DoEarlyLeveling()
 		;DoLevel(0)
 		;TestRosterButtons()
 		;TestUpgradeButtons()
@@ -156,10 +156,14 @@ return
 		;get current pixel info
 		MouseGetPos, outx, outy
 		
+		outx := patron_X
+		outy := patron_Y
+		
 		PixelGetColor, oColor, outx, outy, RGB
 		sText :=  "Current Pixel`nColor: " oColor "`n" "X,Y: " outx ", " outy		
 		ToolTip, %sText%, 25, 200, 15
 		
+		Mousemove, outx, outy
 		gLastX := outx
 		gLastY := outy
 		
@@ -419,6 +423,7 @@ GetWindowSettings()
 		roster_lcheck_y 		:= roster_lcheck_y + gWindowSettings.HeightAdjust
 		autoprogress_y 			:= autoprogress_y + gWindowSettings.HeightAdjust		
 		reset_continue_y 		:= reset_continue_y + gWindowSettings.HeightAdjust
+		patron_Y				:= patron_Y + gWindowSettings.HeightAdjust
 		
 		fam_1_y := fam_1_y + gWindowSettings.HeightAdjust
 		fam_2_y := fam_2_y + gWindowSettings.HeightAdjust

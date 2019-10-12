@@ -19,7 +19,7 @@
 		;NOTE: if using 0 then may cause secondary issues if game or script crashes without releasing the "F" key
 	
 	;mouse behavior
-	global gEnableAutoClick 		:= 1	;script will auto-click 10x for 100ms (upto 60 clicks/second)
+	global gEnableAutoClick 		:= 0	;script will auto-click 10x for 100ms (upto 60 clicks/second)
 	global gEnableMouseSweep 		:= 0	;script will sweep to collect gold/items (also requires gFamiliarCount < 3)
 
 	;Formation to use during GemFarm
@@ -35,7 +35,7 @@
 	;		with either automated MouseClicks or use of the F-Keys
 	;		MouseClick Leveling -- Limits Formation to Champs 1-8
 	;		F-Key Leveling -- can use Champs 1-11 to include Champ 12 see belew		
-	global gLevelingMethod 			:= "F" 	;Values: M or F (set to M to use mouse while leveling or F to use Function keys)
+	global gLevelingMethod 			:= "M" 	;Values: M or F (set to M to use mouse while leveling or F to use Function keys)
 	global gStopChampLeveling		:= 13	;script will stop leveling Champs after this Zone
 	global gAllowF12_Leveling 		:= 0	;Values: 1 or 0 <-- default 1	
 		;----------------------
