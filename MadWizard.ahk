@@ -154,16 +154,12 @@ return
 	F6::
 	{
 		;get current pixel info
-		MouseGetPos, outx, outy
-		
-		outx := patron_X
-		outy := patron_Y
+		MouseGetPos, outx, outy		
 		
 		PixelGetColor, oColor, outx, outy, RGB
 		sText :=  "Current Pixel`nColor: " oColor "`n" "X,Y: " outx ", " outy		
 		ToolTip, %sText%, 25, 200, 15
 		
-		Mousemove, outx, outy
 		gLastX := outx
 		gLastY := outy
 		
