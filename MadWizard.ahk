@@ -115,7 +115,7 @@ return
 	{
 		;TestWindowSettings()
 		;TestFindWorldMap()
-		TestFindPatron()
+		;TestFindPatron()
 		;TestFindTown()
 		;TestTownLocations()
 		;TestAdventureSelect()
@@ -1239,8 +1239,8 @@ Loop_GemRuns()
 		
 		bFound := 0
 		
-		;NOTE: WaitForPixel() -- default performs search 4 times a second for 1 minute (240 times over 1 minute)
-		if (WaitForFindPixel(oPixReset_Complete, outX, outY))
+		;NOTE: WaitForFindPixel_Moving() -- default 4 times a second for 1 minute (240 times over 1 minute)
+		if (WaitForFindPixel_Moving(oPixReset_Complete, outX, outY))
 		{
 			;NOTE: this will be tend to be in the upper left corner (just move down and right a bit)
 			oClickPixel := {}
@@ -1615,41 +1615,13 @@ Loop_GemRuns()
 
 	DoSpecial(nSpecialOption)
 	{
-		ctr := 0
-		timer := 10000 ;10 seconds
-		interval := 100 ;10 times a second
 		bFound := 0
-		prevX := 0
-		prevY := 0
-		
-		;look for Red Pixel in the Close Button of the Specialization Window and Ensure it has stopped moving
-		while (ctr < timer and !bFound)
-		{		
-			ctr :=  ctr + interval		
 
-			if (FindPixel(gSpecialWindowClose, foundX, foundY))
-			{
-				if (prevX = foundX and prevY = foundY)
-				{
-					bFound := 1
-				}
-				else
-				{
-					;found pixel but still moving
-					prevX := foundX
-					prevY := foundY
-					sleep, %interval%	
-				}
-			}
-			else
-			{
-				sleep, %interval%	
-			}
-		}
-		window_closeX := prevX
-
-		if (bFound)
+		;NOTE: WaitForFindPixel_Moving() -- default 4 times a second for 1 minute (240 times over 1 minute)
+		if (WaitForFindPixel_Moving(gSpecialWindowClose, foundX, foundY))
 		{
+			window_closeX := foundX
+			
 			;find a Green Pixel for the First Select Button
 			if (FindPixel(gSpecialWindowSearch, foundX, foundY))
 			{
@@ -1658,12 +1630,11 @@ Loop_GemRuns()
 			else
 			{
 				bFound := 0
-			}		
-
+			}
 		}
 		else
 		{
-			ToolTip, failed to find red, 50,200, 5
+			ToolTip, Failed to find Spec Window Close Box (Red Pixel), 50,200, 5
 		}
 		
 		if (bFound)
@@ -1684,16 +1655,17 @@ Loop_GemRuns()
 			MouseClick, Left, nX, nY	
 			
 			;wait for Specialization Window to Slide off Screen
+			;wait while still can still find the green pixels for the Spec Buttons
 			while(FindPixel(gSpecialWindowSearch, foundX, foundY))
 			{
-				sleep, %interval%				
+				sleep, 100
 			}		
 			
 			return 1
 		}
 		else
 		{
-			ToolTip, failed to find green, 50,225, 6
+			ToolTip, Failed to find Spec Option Boxes (1st Green Pixel), 50,225, 6
 			;MsgBox,%  "Error failed to find Pixel for Special Window --" gSpecialWindowSearch.Color_1 " -- " gSpecialWindowSearch.StartX ", " gSpecialWindowSearch.StartY " -- " gSpecialWindowSearch.EndX ", " gSpecialWindowSearch.EndY
 		}
 		
@@ -1924,8 +1896,41 @@ Loop_GemRuns()
 			sleep, %interval%	
 		}
 		return 0
-	}	
+	}
 
+	;default 4 times a second for 1 minute (240 times over 1 minute)
+	WaitForFindPixel_Moving(oPixel, ByRef foundX, ByRef foundY, timer := 60000, interval := 250)
+	{
+		ctr := 0
+		prevX := 0
+		prevY := 0		
+		
+		;look for Pixel in Seach Box and Ensure it has stopped moving (ie found color in box with same X and Y values)
+		while (ctr < timer)
+		{		
+			ctr :=  ctr + interval
+			if (FindPixel(oPixel, foundX, foundY))
+			{
+				if (prevX = foundX and prevY = foundY)
+				{
+					return 1
+				}
+				else
+				{
+					;found pixel but still moving
+					prevX := foundX
+					prevY := foundY
+					sleep, %interval%	
+				}
+			}
+			else
+			{
+				sleep, %interval%	
+			}
+		}
+		
+		return 0		
+	}
 }
 
 ;HELPERS
