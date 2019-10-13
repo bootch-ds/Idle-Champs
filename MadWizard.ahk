@@ -384,8 +384,8 @@ GetWindowSettings()
 			WinGetPos, outWinX, outWinY, outWidth, outHeight, Idle Champions 
 		
 			gWindowSettings := []		
-			gWindowSettings.X := outWinX
-			gWindowSettings.Y := outWinY 
+			gWindowSettings.X := outWinX - 100
+			gWindowSettings.Y := outWinY - 100
 			gWindowSettings.Width := (outWidth - 1)
 			gWindowSettings.Height := (outHeight - 1)
 			gWindowSettings.HeightAdjust := (outHeight - gWindowHeight_Default)
