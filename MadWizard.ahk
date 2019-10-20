@@ -154,7 +154,7 @@ return
 	#IfWinActive Idle Champions
 	F6::
 	{
-		;get current pixel info
+		;get current pixel info 
 		MouseGetPos, outx, outy		
 		
 		PixelGetColor, oColor, outx, outy, RGB

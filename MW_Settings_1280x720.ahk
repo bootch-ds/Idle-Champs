@@ -33,9 +33,9 @@
 	;Champ Leveling
 	;	Set how Script Level Ups the Champs
 	;		with either automated MouseClicks or use of the F-Keys
-	;		MouseClick Leveling -- Limits Formation to Champs 1-8
+	;		MouseClick Leveling -- Limits Formation to Champs 1-8 
 	;		F-Key Leveling -- can use Champs 1-11 to include Champ 12 see belew		
-	global gLevelingMethod 			:= "F" 	;Values: M or F (set to M to use mouse while leveling or F to use Function keys)
+	global gLevelingMethod 			:= "M" 	;Values: M or F (set to M to use mouse while leveling or F to use Function keys)
 	global gStopChampLeveling		:= 13	;script will stop leveling Champs after this Zone
 	global gAllowF12_Leveling 		:= 0	;Values: 1 or 0 <-- default 1	
 		;----------------------

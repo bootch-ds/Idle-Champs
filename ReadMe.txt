@@ -17,7 +17,7 @@ there are points where this can be speed up
 
 ******************************************************
 *	Recent Changes:
-******************************************************
+****************************************************** 
 	Version - 191019 (10/19/19)
 		modified color check for Familiar Background Overlay
 		modified code to detect for Pixels that are sliding onto the screen (from the left)

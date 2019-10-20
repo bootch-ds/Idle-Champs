@@ -14,7 +14,7 @@
 		added option: to minimize flashing when placing familiars (due to Update on how familiar placement)
 		added setting: to set which champs are targeted for Early Priority Leveling (ie deeking/shandi/minsc)
 		correction: Vajra should be spelled correctly		
-		(thx Neal for several of these issues)
+		(thx Neal for several of these issues) 
 	Version - 191001 (10/01/19)
 		bug fix: corrected issues with Find First Mob (had incorrect variable names)
 		bug fix: modified FindTown function (should now find correct town regardless of game progression)
