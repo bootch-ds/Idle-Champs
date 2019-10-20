@@ -226,7 +226,7 @@
 	global adventure_dps_x	:= 70
 	global adventure_dps_y	:= 30
 	global adventure_dps_c1	:= 0x90181C
-	global adventure_dps_c2 := 0x3A0A0B
+	global adventure_dps_c2 := 0x731316
 
 ;search box for 1st mob
 	global mob_area_L	:= 750
@@ -286,11 +286,12 @@
 	global special_window_spacing 	:= 248
 
 ;Searchbox to find the Reset Button
-	global reset_complete_T		:= 500
+	global reset_complete_T		:= 475
 	global reset_complete_B		:= 600
-	global reset_complete_L		:= 520
-	global reset_complete_R		:= 750	
+	global reset_complete_L		:= 500
+	global reset_complete_R		:= 625
 	global reset_complete_C		:= 0x54B42D		;green-ish
+	global reset_complete_C2	:= 0x5AC030		;hover green
 
 ;Pixel location for the Continue Button (During Reset)
 	global reset_continue_x		:= 560

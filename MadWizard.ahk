@@ -1,7 +1,7 @@
 #SingleInstance force
 ;Mad Wizard Gem Farming Script
 ;by Bootch
-;version: 191010 (10/10/19)
+;version: 191019 (10/19/19)
 ;original script by Hikibla 
 
 ;LEVEL DETECTOR GEM FARM
@@ -135,7 +135,8 @@ return
 		;TestTransition()
 		;TestSpecializationWinClose()
 		;TestSpecializationSelectButtons()
-				
+		TestResetContinue()
+		
 		;CheckPixelInfo(REPLACE_WITH_PIXEL_OBJECT)
 		;MoveToPixel(gRosterButton)
 		;TestFindPixel()
@@ -173,7 +174,7 @@ return
 		;get last pixel info
 		nX:= gLastX
 		nY:= gLastY
-		
+				
 		PixelGetColor, oColor, nX, nY, RGB
 		Sleep, 500
 		MouseMove, nX, nY, 5	
@@ -384,8 +385,8 @@ GetWindowSettings()
 			WinGetPos, outWinX, outWinY, outWidth, outHeight, Idle Champions 
 		
 			gWindowSettings := []		
-			gWindowSettings.X := outWinX - 100
-			gWindowSettings.Y := outWinY - 100
+			gWindowSettings.X := outWinX
+			gWindowSettings.Y := outWinY 
 			gWindowSettings.Width := (outWidth - 1)
 			gWindowSettings.Height := (outHeight - 1)
 			gWindowSettings.HeightAdjust := (outHeight - gWindowHeight_Default)
@@ -431,8 +432,10 @@ GetWindowSettings()
 
 		global gRosterButton := ""			;pixel object to find the click damage button also used often to find champ level up buttons
 		global gLeftRosterPixel := ""		;pixel object to help in scrolling champ roster left
-		global gSpecialWindowClose := ""	;pixel object to help determine if Specialization Window is showing
-		global gSpecialWindowSearch := ""	;pixel object to find green select buttons in the Specialization Windows
+		global gSpecialWindowClose := ""	;pixel search box to help determine if Specialization Window is showing
+		global gSpecialWindowSearch := ""	;pixel search box to find green select buttons in the Specialization Windows
+		global oPixReset_Complete := ""		;pixel search box to find green Complete Button (1st window on reset)
+		global oPixReset_Continue := ""		;pixel object to find green Continue Button (2nd window on reset)
 	Init()
 	{
 		gFound_Error := 0
@@ -471,6 +474,19 @@ GetWindowSettings()
 		gSpecialWindowSearch.EndY 		:= special_window_B
 		gSpecialWindowSearch.Color_1 	:= special_window_C
 		gSpecialWindowSearch.Spacing 	:= special_window_spacing
+		
+		oPixReset_Complete := {}
+		oPixReset_Complete.StartX 	:= reset_complete_L
+		oPixReset_Complete.EndX 	:= reset_complete_R
+		oPixReset_Complete.StartY 	:= reset_complete_T
+		oPixReset_Complete.EndY 	:= reset_complete_B
+		oPixReset_Complete.Color_1 	:= reset_complete_C
+		oPixReset_Complete.Color_2 	:= reset_complete_C2
+		
+		oPixReset_Continue := {}
+		oPixReset_Continue.X 		:= reset_continue_x
+		oPixReset_Continue.Y 		:= reset_continue_y
+		oPixReset_Continue.Color_1 	:= reset_continue_c1		
 	}
 }
 
@@ -1206,28 +1222,9 @@ Loop_GemRuns()
 		}
 	}
 
-		global oPixReset_Complete := ""
-		global oPixReset_Continue :=
+		
 	ResetAdventure()
 	{
-		if (!oPixReset_Complete)
-		{
-			oPixReset_Complete := {}
-			oPixReset_Complete.StartX 	:= reset_complete_L
-			oPixReset_Complete.EndX 	:= reset_complete_R
-			oPixReset_Complete.StartY 	:= reset_complete_T
-			oPixReset_Complete.EndY 	:= reset_complete_B
-			oPixReset_Complete.Color_1 	:= reset_complete_C
-		}
-		
-		if (!oPixReset_Continue)
-		{
-			oPixReset_Continue := {}
-			oPixReset_Continue.X 		:= reset_continue_x
-			oPixReset_Continue.Y 		:= reset_continue_y
-			oPixReset_Continue.Color_1 	:= reset_continue_c1
-		}
-		
 		IfWinActive, Idle Champions
 		{
 			Send, R
@@ -1237,15 +1234,14 @@ Loop_GemRuns()
 			return
 		}
 		
-		bFound := 0
-		
+		bFound := 0		
 		;NOTE: WaitForFindPixel_Moving() -- default 4 times a second for 1 minute (240 times over 1 minute)
 		if (WaitForFindPixel_Moving(oPixReset_Complete, outX, outY))
 		{
 			;NOTE: this will be tend to be in the upper left corner (just move down and right a bit)
 			oClickPixel := {}
-			oClickPixel.X := outX + 5
-			oClickPixel.Y := outY + 5
+			oClickPixel.X := outX + 15
+			oClickPixel.Y := outY + 15
 			
 			bFound := 1
 			ClickPixel(oClickPixel)		
@@ -2431,6 +2427,25 @@ Loop_GemRuns()
 		return
 	}
 	
+	TestResetContinue()
+	{
+		;TestTraceBox(oPixReset_Complete)
+		
+		bFound := 0		
+		;NOTE: WaitForFindPixel_Moving() -- default 4 times a second for 1 minute (240 times over 1 minute)
+		if (WaitForFindPixel_Moving(oPixReset_Complete, outX, outY))
+		{
+			;NOTE: this will be tend to be in the upper left corner (just move down and right a bit)
+			oClickPixel := {}
+			oClickPixel.X := outX + 15
+			oClickPixel.Y := outY + 15
+			
+			bFound := 1
+			MoveToPixel(oClickPixel)
+			;ClickPixel(oClickPixel)		
+		}		
+	}
+	
 	TestFindPixel()
 	{
 		oPix1 := {}		
@@ -2514,12 +2529,22 @@ Loop_GemRuns()
 		sleep, 250
 		MoveToPixel(oPixel)
 	}
-	TestTraceBox()
+	TestTraceBox(oPix)
 	{
-		nLeft :=	mob_area_L
-		nRight :=	mob_area_R
-		nTop := 	mob_area_T 
-		nBottom :=	mob_area_B
+		if (oPix)
+		{
+			nLeft :=	oPix.StartX
+			nRight :=	oPix.EndX
+			nTop := 	oPix.StartY
+			nBottom :=	oPix.EndY
+		}
+		else
+		{
+			nLeft :=	mob_area_L
+			nRight :=	mob_area_R
+			nTop := 	mob_area_T 
+			nBottom :=	mob_area_B
+		}
 		
 		MouseMove, nLeft, nTop, 15
 		sleep, 500

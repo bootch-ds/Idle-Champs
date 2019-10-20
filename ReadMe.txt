@@ -1,7 +1,7 @@
 original script was written by Hikibla but  numerous functions and code have evolved since then
 
 Re-written/Modified by: Bootch
-Current Version Date: 	191010 (10/10/19)
+Current Version Date: 	191019 (10/19/19)
 Resolution Setting:		1366x768 or 1280x720 (NOTE: 1366x768 long out of date)
 
 ******************************************************
@@ -18,6 +18,9 @@ there are points where this can be speed up
 ******************************************************
 *	Recent Changes:
 ******************************************************
+	Version - 191019 (10/19/19)
+		modified color check for Familiar Background Overlay
+		modified code to detect for Pixels that are sliding onto the screen (from the left)
 	Version - 191010 (10/10/19)
 		modification: moved User Settings to the MW_Settings_1280x720.ahk
 			now all user edits should be in the MW_Settings_1280x720.ahk file vs MadWizard.ahk
