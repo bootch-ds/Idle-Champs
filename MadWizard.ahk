@@ -1,7 +1,7 @@
 #SingleInstance force
 ;Mad Wizard Gem Farming Script
 ;by Bootch
-;version: 191019 (10/19/19)
+;version: 191020 (10/20/19)
 ;original script by Hikibla 
 
 ;LEVEL DETECTOR GEM FARM
@@ -126,6 +126,8 @@ return
 		;DoLevel(0)
 		;TestRosterButtons()
 		;TestUpgradeButtons()
+		;TestReadSpec(1)
+		;TestReadPriorityLeveling(1)
 		;AutoLevelChamps(2)
 		;LevelUp(0)
 		;LevelUp(4)
@@ -135,7 +137,7 @@ return
 		;TestTransition()
 		;TestSpecializationWinClose()
 		;TestSpecializationSelectButtons()
-		TestResetContinue()
+		;TestResetContinue()
 		
 		;CheckPixelInfo(REPLACE_WITH_PIXEL_OBJECT)
 		;MoveToPixel(gRosterButton)
@@ -1296,21 +1298,22 @@ Loop_GemRuns()
 					v := Trim(v)
 				}
 				
-				if (gCurrentPatron = "NP" and split_vals.Count() > 0)
+				nCount := SizeOf(split_vals)
+				if (gCurrentPatron = "NP" and nCount > 0)
 				{
 					sVal := split_vals[1]
 				}					
-				else if (gCurrentPatron = "M" and split_vals.Count() > 1)
+				else if (gCurrentPatron = "M" and nCount > 1)
 				{
 					sVal := split_vals[2]
 				}
-				else if (gCurrentPatron = "V" and split_vals.Count() > 2)
+				else if (gCurrentPatron = "V" and nCount > 2)
 				{
 					sVal := split_vals[3]
 				}	
-				else if (split_vals.Count() > 0)
+				else if (nCount > 0)
 				{
-					value := split_vals[1]
+					sVal := split_vals[1]
 				}				
 			}
 			
@@ -1326,45 +1329,46 @@ Loop_GemRuns()
 	{
 		if(gFormation != -1)
 		{
-			value := Champ%nChampNumber%_SpecialOption%gFormation%	
+			sVal := Champ%nChampNumber%_SpecialOption%gFormation%	
 		}
 		else
 		{	
-			value := Champ%nChampNumber%_SpecialOptionQ
+			sVal := Champ%nChampNumber%_SpecialOptionQ
 		}
 		
 		;MsgBox, % "Champ_Number: " nChampNumber " Formation:" gFormation "`nSetting Text: " value 
-		if (value)
+		if (sVal)
 		{			
-			if (InStr(value, "|"))
+			if (InStr(sVal, "|"))
 			{
-				split_vals := StrSplit(value, "|")
+				split_vals := StrSplit(sVal, "|")
 				for k, v in split_vals
 				{
 					v := Trim(v)
 				}
 				
-				if (gCurrentPatron = "NP" and split_vals.Count() > 0)
+				nCount := SizeOf(split_vals)
+				if (gCurrentPatron = "NP" and nCount > 0)
 				{
-					value := split_vals[1]
+					sVal := split_vals[1]
 				}					
-				else if (gCurrentPatron = "M" and split_vals.Count() > 1)
+				else if (gCurrentPatron = "M" and nCount > 1)
 				{
-					value := split_vals[2]
+					sVal := split_vals[2]
 				}
-				else if (gCurrentPatron = "V" and split_vals.Count() > 2)
+				else if (gCurrentPatron = "V" and nCount > 2)
 				{
-					value := split_vals[3]
+					sVal := split_vals[3]
 				}	
-				else if (split_vals.Count() > 0)
+				else if (nCount > 0)
 				{
-					value := split_vals[1]
-				}
+					sVal := split_vals[1]
+				}				
 			}
 			
-			if (value is integer)
+			if (sVal is integer)
 			{
-				return value
+				return sVal
 			}			
 		}
 		return -1
@@ -1916,13 +1920,9 @@ Loop_GemRuns()
 					;found pixel but still moving
 					prevX := foundX
 					prevY := foundY
-					sleep, %interval%	
 				}
 			}
-			else
-			{
-				sleep, %interval%	
-			}
+			sleep, %interval%	
 		}
 		
 		return 0		
@@ -1931,6 +1931,16 @@ Loop_GemRuns()
 
 ;HELPERS
 {
+	SizeOf(oArray)
+	{
+		ctr := 0
+		for k, v in oArray
+		{
+			ctr := ctr + 1
+		}
+		return ctr
+	}
+	
 	CenterMouse()
 	{
 		nX := gWindowSettings.Width / 2
@@ -2324,6 +2334,65 @@ Loop_GemRuns()
 		}
 	}
 
+	TestReadSpec(nChampNumber)
+	{
+		if(gFormation != -1)
+		{
+			sVal := Champ%nChampNumber%_SpecialOption%gFormation%	
+		}
+		else
+		{	
+			sVal := Champ%nChampNumber%_SpecialOptionQ
+		}
+		MsgBox, % "Champ_Number: " nChampNumber " Formation:" gFormation "`nSetting Text: " sVal 
+		
+		if (sVal)
+		{			
+			if (InStr(sVal, "|"))
+			{
+				split_vals := StrSplit(sVal, "|")
+				for k, v in split_vals
+				{
+					v := Trim(v)
+				}
+				
+				nCount := SizeOf(split_vals)
+				
+				MsgBox, % "Count: " split_vals.Count() " MaxIndex: " split_vals.MaxIndex() "SizeOf: " nCount
+				if (gCurrentPatron = "NP" and nCount > 0)
+				{
+					sVal := split_vals[1]
+				}					
+				else if (gCurrentPatron = "M" and nCount > 1)
+				{
+					sVal := split_vals[2]
+				}
+				else if (gCurrentPatron = "V" and nCount > 2)
+				{
+					sVal := split_vals[3]
+				}	
+				else if (nCount > 0)
+				{
+					sVal := split_vals[1]
+				}				
+			}
+			
+			if (sVal is integer)
+			{
+				;return sVal
+			}			
+		}
+		
+		sval := GetChampSpecValue(nChampNumber)
+		MsgBox,% sval
+	}
+	
+	TestReadPriorityLeveling(nChampNumber)
+	{
+		sval := GetChampEarlyLeveling(nChampNumber)
+		MsgBox,% sval
+	}
+	
 	TestRosterButtons()
 	{
 		nX := roster_x

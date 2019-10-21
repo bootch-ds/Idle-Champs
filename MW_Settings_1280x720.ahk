@@ -34,7 +34,7 @@
 	;	Set how Script Level Ups the Champs
 	;		with either automated MouseClicks or use of the F-Keys
 	;		MouseClick Leveling -- Limits Formation to Champs 1-8 
-	;		F-Key Leveling -- can use Champs 1-11 to include Champ 12 see belew		
+	;		F-Key Leveling -- can use Champs 1-11 to include Champ 12 see below		
 	global gLevelingMethod 			:= "M" 	;Values: M or F (set to M to use mouse while leveling or F to use Function keys)
 	global gStopChampLeveling		:= 13	;script will stop leveling Champs after this Zone
 	global gAllowF12_Leveling 		:= 0	;Values: 1 or 0 <-- default 1	
@@ -85,7 +85,7 @@
 	global Champ5	:= -1
 	;global Champ6	:= 8			;level up slot 6 (shandie) 8 times for All Runs (for lower favor amounts)
 	global Champ6	:= 18			;level up slot 6 (shandie) 18 times for All Runs (for higher favor amounts)	
-	global Champ7	:= "4|4|-1"		;level up slot 7 (minsc) 4 times for No Patron and Mirt (wont do early leveling of Black VIper on Vajra)
+	global Champ7	:= "4|4|-1"		;level up slot 7 (minsc) 4 times for No Patron and Mirt (wont do early leveling of Black Viper on Vajra)
 	global Champ8	:= -1
 	global Champ9	:= -1
 	global Champ10	:= -1
@@ -240,7 +240,7 @@
 	global autoprogress_y		:= 134 				; vertical location of a white pixel in the autoprogress arrow
 	global autoprogress_c1		:= 0xFFFFFF			; white color
 	
-;variables for checking if a transition is occuring (center of screen and towards top)
+;variables for checking if a transition is occurring (center of screen and towards top)
 	global transition_y 	:= 35 				;toward top of screen
 	global transition_c1	:= 0x000000 		;black
 
@@ -271,7 +271,7 @@
 	global roster_up_c2		:= 0x97316D			;purple with open window		;0x611349	(katti 5B1149)	
 	global roster_up_g1		:= 0x5B5B5B			;grey without open window 					(katti 434343)
 	
-;red pixel for the close button of the Speicalization Window
+;red pixel for the close button of the Specialization Window
 	global special_window_close_L	:= 0			;this will be screen left
 	global special_window_close_R	:= 0			;this will be screen width
 	global special_window_close_T	:= 110
