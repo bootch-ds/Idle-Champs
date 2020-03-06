@@ -50,14 +50,18 @@
 
 ;#include MW_Settings_1366x768.ahk
 #include MW_Settings_1280x720.ahk
+#include MW_Configuration.ahk
+
+;pixels will now be relative to the Screen vs Window <- should resolve issues with different Border Sizes
+CoordMode, Pixel, Client
+CoordMode, Mouse, Client
+CoordMode, ToolTip, Client
 
 ;internal globals
 global gFound_Error 	:= 0
+global gDebug			:= 0
 
 global gFormation		:= "-1"
-global gHR_Enabled 		:= 0
-global nHR_CurrentLimit := 50
-
 global gLevel_Number 	:= 0
 global gTotal_RunCount	:= 0
 global gTotal_Bosses 	:= 0
@@ -67,7 +71,6 @@ global gTotal_RunTime 	:= "00:00:00"
 
 ;get and store the settings for the GameWindow
 GetWindowSettings()
-Adjust_YValues()
 Init()
 ShowHelpTip()
 
@@ -91,18 +94,14 @@ return
 		return
 	}
 
-	;Toggle High Roller
+	;NOT USED
 	#IfWinActive Idle Champions
 	F3:: 
-	{
-		gHR_Enabled := !gHR_Enabled
-		nHR_CurrentLimit := nHR_Min
-		UpdateToolTip()
-		
+	{		
 		return
 	}
 
-	;holder for running to wall
+	;NOT USED
 	#IfWinActive Idle Champions
 	F4::
 	{
@@ -113,31 +112,41 @@ return
 	#IfWinActive Idle Champions
 	F5::
 	{
+		gDebug := 1
+		
 		;TestWindowSettings()
-		;TestFindWorldMap()
-		;TestFindPatron()
-		;TestFindTown()
-		;TestTownLocations()
+		;WorldMapWindow_Check()		
+		;FindPatron()		
+		;FindTown(x, y)
+		;StartAdventure(x,y)
 		;TestAdventureSelect()
-		;TestFindMob()		
-		;TestAutoProgress()	
-		;DoFamiliars(6)
-		;DoEarlyLeveling()
-		;DoLevel(0)
+		;AdventureWindow_Check(100)
+		;FindMob()		
+		;DisableAutoProgress()
+		;ScrollRosterLeft()
+		
+		;CheckRosterButton1()
 		;TestRosterButtons()
 		;TestUpgradeButtons()
-		;TestReadSpec(1)
-		;TestReadPriorityLeveling(1)
-		;AutoLevelChamps(2)
-		;LevelUp(0)
-		;LevelUp(4)
-		;LevelUp(3,15)	
-		;TestGetChampSpecValue(7) ;testing with slot1		
-		;DoSpecial(3)
-		;TestTransition()
 		;TestSpecializationWinClose()
 		;TestSpecializationSelectButtons()
+		
+			;DoEarlyLeveling()
+			;DoLevel(0)		
+			;TestReadSpec(1)
+			;TestReadPriorityLeveling(1)
+			;AutoLevelChamps(2)
+			;LevelUp(0)
+			;LevelUp(4)
+			;LevelUp(3,15)	
+			;TestGetChampSpecValue(7) ;testing with slot1		
+			;DoSpecial(3)		
+		
+		;TestTransition()
+		;TestResetComplete()
+		;TestResetSkip()
 		;TestResetContinue()
+		;ResetAdventure()
 		
 		;CheckPixelInfo(REPLACE_WITH_PIXEL_OBJECT)
 		;MoveToPixel(gRosterButton)
@@ -147,6 +156,8 @@ return
 		;TestTraceBox()
 		;MouseSweep()
 		;MouseAutoClick()
+		
+		gDebug := 0
 		return
 	}
 
@@ -175,7 +186,7 @@ return
 	{
 		;get last pixel info
 		nX:= gLastX
-		nY:= gLastY
+		nY:= gLastY	
 				
 		PixelGetColor, oColor, nX, nY, RGB
 		Sleep, 500
@@ -265,17 +276,8 @@ return
 		dtCurrentRunTime := DateTimeDiff(dtLoopStartTime, dtNow)		
 			
 		sToolTip := "Prev Run: " dtPrevRunTime 	
-		sToolTip := sToolTip "`nCurrent Run: " dtCurrentRunTime
-		
-		if(gHR_Enabled)
-		{
-			sToolTip := sToolTip "`nTarget Level: " nHR_CurrentLimit
-		}
-		else
-		{
-			sToolTip := sToolTip "`nTarget Level: " nMax_Level
-		}	
-		
+		sToolTip := sToolTip "`nCurrent Run: " dtCurrentRunTime		
+		sToolTip := sToolTip "`nTarget Level: " nMax_Level		
 		sToolTip := sToolTip "`nCurrent Level: " gLevel_Number
 		sToolTip := sToolTip "`nPatron: " (gCurrentPatron = "NP" ? "None" : (gCurrentPatron = "M" ? "Mirt" : (gCurrentPatron = "V" ? "Vajra" : "None")))
 		
@@ -289,7 +291,7 @@ return
 		
 		if (gShowHelpTip)
 		{
-			ToolTip, % "F1: Show Help`nF2: Start Gem Farm`nF3: Toggle HR Leveling`nF8: Show Stats`nF9: Reload Script`nUP: +10 to Target Levels`nDOWN: -10 to Target Levels`n``: Pause Script", 25, 325, 3
+			ToolTip, % "F1: Show Help`nF2: Start Gem Farm`nF8: Show Stats`nF9: Reload Script`nUP: +10 to Target Levels`nDOWN: -10 to Target Levels`n``: Pause Script", 25, 325, 3
 			SetTimer, ClearToolTip, -5000 
 		}
 		else
@@ -383,17 +385,15 @@ GetWindowSettings()
 	{
 		if WinExist("Idle Champions")
 		{
-			WinActivate
+			WinActivate		
 			WinGetPos, outWinX, outWinY, outWidth, outHeight, Idle Champions 
-		
+					
 			gWindowSettings := []		
-			gWindowSettings.X := outWinX
-			gWindowSettings.Y := outWinY 
-			gWindowSettings.Width := (outWidth - 1)
-			gWindowSettings.Height := (outHeight - 1)
-			gWindowSettings.HeightAdjust := (outHeight - gWindowHeight_Default)
-
-			;MsgBox, % "error init window (this) -- " this.Width ", " this.Height " -- " this.X ", " this.Y
+			gWindowSettings.X := 0
+			gWindowSettings.Y := 0
+			gWindowSettings.Width :=  outWidth - 20
+			gWindowSettings.Height := outHeight - 40
+			;MsgBox, % "error init window (this) -- `nScreen Size:" A_ScreenWidth ", " A_ScreenHeight "`nWindow Size: " outWidth ", "  outHeight
 		}
 		else
 		{
@@ -407,36 +407,12 @@ GetWindowSettings()
 
 ;Init Globals/Settings
 {
-	Adjust_YValues()
-	{
-		;MsgBox, % gWindowSettings.HeightAdjust
-		
-		worldmap_favor_y 		:= worldmap_favor_y + gWindowSettings.HeightAdjust
-		swordcoast_y 			:= swordcoast_y + gWindowSettings.HeightAdjust
-		toa_y 					:= toa_y + gWindowSettings.HeightAdjust		
-		select_win_y 			:= select_win_y + gWindowSettings.HeightAdjust
-		list_top_y 				:= list_top_y + gWindowSettings.HeightAdjust
-		adventure_dps_y 		:= adventure_dps_y + gWindowSettings.HeightAdjust
-		transition_y 			:= transition_y + gWindowSettings.HeightAdjust
-		roster_y 				:= roster_y + gWindowSettings.HeightAdjust
-		roster_lcheck_y 		:= roster_lcheck_y + gWindowSettings.HeightAdjust
-		autoprogress_y 			:= autoprogress_y + gWindowSettings.HeightAdjust		
-		reset_continue_y 		:= reset_continue_y + gWindowSettings.HeightAdjust
-		patron_Y				:= patron_Y + gWindowSettings.HeightAdjust
-		
-		fam_1_y := fam_1_y + gWindowSettings.HeightAdjust
-		fam_2_y := fam_2_y + gWindowSettings.HeightAdjust
-		fam_3_y := fam_3_y + gWindowSettings.HeightAdjust
-		fam_4_y := fam_4_y + gWindowSettings.HeightAdjust
-		fam_5_y := fam_5_y + gWindowSettings.HeightAdjust
-		fam_6_y := fam_6_y + gWindowSettings.HeightAdjust
-	}
-
 		global gRosterButton := ""			;pixel object to find the click damage button also used often to find champ level up buttons
 		global gLeftRosterPixel := ""		;pixel object to help in scrolling champ roster left
 		global gSpecialWindowClose := ""	;pixel search box to help determine if Specialization Window is showing
 		global gSpecialWindowSearch := ""	;pixel search box to find green select buttons in the Specialization Windows
 		global oPixReset_Complete := ""		;pixel search box to find green Complete Button (1st window on reset)
+		global oPixReset_Skip := ""			;pixel object to find green Skip Button (2nd window on reset)
 		global oPixReset_Continue := ""		;pixel object to find green Continue Button (2nd window on reset)
 	Init()
 	{
@@ -485,6 +461,11 @@ GetWindowSettings()
 		oPixReset_Complete.Color_1 	:= reset_complete_C
 		oPixReset_Complete.Color_2 	:= reset_complete_C2
 		
+		oPixReset_Skip := {}
+		oPixReset_Skip.X 		:= reset_skip_x
+		oPixReset_Skip.Y 		:= reset_skip_y
+		oPixReset_Skip.Color_1 	:= reset_skip_c1	
+		
 		oPixReset_Continue := {}
 		oPixReset_Continue.X 		:= reset_continue_x
 		oPixReset_Continue.Y 		:= reset_continue_y
@@ -524,26 +505,6 @@ Loop_GemRuns()
 			RunAdventure()
 		}
 		
-		if(gHR_Enabled)
-		{
-			if ((nHR_CurrentLimit + 10) <= nHR_Max)
-			{
-				nHR_CurrentLimit := nHR_CurrentLimit + 10
-			}
-			else
-			{
-				gHR_Enabled := 0				
-			}
-		}
-		
-		;Start High Roller Levels if just past Specified Time and Auto HR Enabled
-		if (bAutoHR_Enable and IsNewDay() and !gHR_Enabled)
-		{
-			gHR_Enabled := 1
-			nHR_CurrentLimit := nHR_Min
-			UpdateToolTip()
-		}	
-	
 		bAdventureWindowFound := AdventureWindow_Check(1)
 		if (bAdventureWindowFound)
 		{
@@ -613,58 +574,114 @@ Loop_GemRuns()
 		{
 			oCornerPixel := {}
 			oCornerPixel.X := worldmap_favor_x
-			oCornerPixel.Y := worldmap_favor_y
+			oCornerPixel.Y := worldmap_favor_y		
 		
-		
-			oCornerPixel.Color_1 := worldmap_favor_c1	
+			oCornerPixel.Color_1 := worldmap_favor_c1
 			oCornerPixel.Color_2 := worldmap_favor_c2
 		}
 		
-		;wait for up to 5 second with 4 checks per second for the Target Pixel to show
-		if (!WaitForPixel(oCornerPixel, 5000))
+		bFound := 0		
+		if (gDebug = 1)
 		{
-			;CheckPixelInfo(oCornerPixel)
-			;ShowToolTip("ERROR: Failed to find World Map in a Timely Manner.")
-			return 0
+			bFound := WaitForPixel(oCornerPixel, 100)
 		}
-		return 1
+		else
+		{
+			;wait for up to 5 second with 4 checks per second for the Target Pixel to show
+			bFound := WaitForPixel(oCornerPixel, 5000)
+		}
+		
+		sText := ""
+		if (bFound)
+		{
+			sText := "Success: You are currently on the World Map"
+		}
+		else
+		{
+			sText := "Error: Could not determine if you are on the World Map"
+		
+			PixelGetColor, oColor, worldmap_favor_x, worldmap_favor_y, RGB
+			
+			sText := sText "`nSearching For: " Format("0x{:X}", oCornerPixel.Color_1) " or " Format("0x{:X}", oCornerPixel.Color_2)
+			sText := sText "`nColor Found: " oColor
+			
+			MouseMove, worldmap_favor_x, worldmap_favor_y
+			sleep, 500			
+		}
+		
+		if (gDebug or !bFound)
+		{
+			MsgBox, % sText		
+		}		
+				
+		return bFound
 	}
 	
 		global gCurrentPatron := ""
+		global oPatron_NP := ""
+		global oPatron_M := ""
+		global oPatron_V := ""
 	FindPatron()
 	{
-		oPatron_NP := {}
-		oPatron_NP.X 		:= patron_X
-		oPatron_NP.Y 		:= patron_Y
-		oPatron_NP.Color_1 	:= patron_NP_C
-		
-		oPatron_M := {}
-		oPatron_M.X 		:= patron_X
-		oPatron_M.Y 		:= patron_Y
-		oPatron_M.Color_1 	:= patron_M_C
-		
-		oPatron_V := {}
-		oPatron_V.X 		:= patron_X
-		oPatron_V.Y 		:= patron_Y
-		oPatron_V.Color_1 	:= patron_V_C
+		if (!oCornerPixel)
+		{
+			oPatron_NP := {}
+			oPatron_NP.X 		:= patron_X
+			oPatron_NP.Y 		:= patron_Y
+			oPatron_NP.Color_1 	:= patron_NP_C
+		}
+		if (!oCornerPixel)
+		{
+			oPatron_M := {}
+			oPatron_M.X 		:= patron_X
+			oPatron_M.Y 		:= patron_Y
+			oPatron_M.Color_1 	:= patron_M_C
+		}
+		if (!oCornerPixel)
+		{
+			oPatron_V := {}
+			oPatron_V.X 		:= patron_X
+			oPatron_V.Y 		:= patron_Y
+			oPatron_V.Color_1 	:= patron_V_C
+		}
 		
 		gCurrentPatron := "NP"
+		bFound := 0
+		if (CheckPixel(oPatron_NP))
+		{	
+			gCurrentPatron := "NP"
+			gFormation := gFormation_NP
+			bFound := 1
+		}
 		if (CheckPixel(oPatron_M))
 		{	
 			gCurrentPatron := "M"
-			gFormation := gFormation_M
-			return
+			gFormation := gFormation_M			
+			bFound := 1
 		}
 		if (CheckPixel(oPatron_V))
 		{
 			gCurrentPatron := "V"
-			gFormation := gFormation_V
-			return
+			gFormation := gFormation_V			
+			bFound := 1
 		}
 		
 		if (gFormation = -1)
 		{
 			gFormation := gFormation_%gCurrentPatron%
+		}		
+		
+		if (gDebug)
+		{
+			if (bFound)
+			{
+				sText := "Success: Found a Patron `n" "Patron : " gCurrentPatron
+			}
+			else
+			{
+				sText := "Error: Failed to determine Current Patron"					
+			}
+			MsgBox, % sText
 		}		
 		return		
 	}
@@ -687,7 +704,7 @@ Loop_GemRuns()
 		
 		;once found for this Script Run saves the position till reset/restart
 		;skips searches for future loop iterations
-		if (oTown.HasFound = 1)
+		if (oTown.HasFound = 1 && !gDebug)
 		{
 			townX := oTown.FoundX
 			townY := oTown.FoundY
@@ -698,22 +715,17 @@ Loop_GemRuns()
 		oTown.StartY 	:= townsearch_T
 				
 		nTownCount 	:= 0
-		bFound 		:= 1
+		bSearching	:= 1
 		bFoundTown 	:= 0
-		while (bFound = 1)
-		{
-		
-			bFound := FindPixel(oTown, found%A_Index%_X, found%A_Index%_Y)
-			if (bFound = 1)
+		while (bSearching = 1)
+		{		
+			bSearching := FindPixel(oTown, found%A_Index%_X, found%A_Index%_Y)
+			if (bSearching = 1)
 			{
 				nTownCount := nTownCount + 1
 				oTown.StartY := found%A_Index%_Y + 25	
 				
-				bFoundTown := 1
-				;TEST
-				;MsgBox, Found Town: %A_Index%
-				;MouseMove, found%A_Index%_X, found%A_Index%_Y
-				;sleep, 1000
+				bFoundTown := 1				
 			}
 			else
 			{
@@ -741,7 +753,7 @@ Loop_GemRuns()
 		if (nTownCount = 2)	 
 		{
 			;an arbitrary position between the location of Town2 for Newer Players
-			;for brand new players 	-> Town1 is Tutoril and Town2 is MadWizard
+			;for brand new players 	-> Town1 is Tutorial and Town2 is MadWizard
 			;when WaterDeep unlocks -> Town1 is MadWizard and Town2 is WaterDeep (tutorial is off top of map)
 			nX := 600
 			
@@ -771,10 +783,16 @@ Loop_GemRuns()
 			townY := townY + 10 ;move the Y locations slightly lower
 			oTown.FoundX := townX
 			oTown.FoundY := townY
-			return 1
 		}
 		
-		return 0
+		if (gDebug)
+		{
+			sText := "Debugging`nFound " nTownCount " towns`nMouse should have move to the Town for Mad Wizard"
+			MouseMove, oTown.FoundX, oTown.FoundY, 5
+			MsgBox, % sText					
+		}
+		
+		return bFoundTown
 	}
 
 		global oSelect_WinChecker := ""
@@ -783,6 +801,16 @@ Loop_GemRuns()
 		global oAdventureStart := ""
 	StartAdventure(townX, townY)
 	{
+		if (gDebug)
+		{
+			gDebug := 0 			;Turn off Debugging Messages for FindTown()
+			FindTown(townX, townY)
+			gDebug := 1				;Turn Debugging Messages back on
+			
+			MouseClick, L, townX, townY
+			Sleep 250
+		}
+
 		;ensure adventure select window is open
 		if (!oSelect_WinChecker)
 		{
@@ -793,27 +821,40 @@ Loop_GemRuns()
 		}
 	
 		ctr := 0
-		;check 10 times in 5sec intervals for the Adventure Select Window show;
+		ctr_limit := 10
+		if (gDebug)
+		{
+			ctr_limit := 1
+		}
+		;check 10 times in 5sec intervals for the Adventure Select Window show
 		;server lag can cause issues between clicking the town and selector window displaying
-		while (!bFound and ctr < 10)
+		while (!bFound and ctr < ctr_limit)
 		{
 			;open adventure select window
 			Click %town_x%, %town_y%				; Click the town button for mad wizard adventure
 			Sleep 100
 			
-			;wait for 10 seconds for Selector window to show
-			if (WaitForPixel(oSelect_WinChecker, 5000))
-				bFound := 1
-			
+			;wait for 5 seconds for Selector window to show
+			bFound := WaitForPixel(oSelect_WinChecker, 5000)
 			ctr := ctr + 1
 		}
-		
-		ctr := 0
 			
+		;failed to open the selector window in a timely manner
 		if (!bFound)
 		{
-			;failed to open the selector window in a timely manner
-			;MsgBox, ERROR: Failed to find the Adventure Select Window 
+			if (gDebug)
+			{
+				MsgBox, ERROR: Failed to find the Adventure Select Window 
+				sText := "Error: Could not Find the Adventure Select Window"
+		
+				PixelGetColor, oColor, oSelect_WinChecker.X, oSelect_WinChecker.Y, RGB
+			
+				sText := sText "`nSearching For: " Format("0x{:X}", oSelect_WinChecker.Color_1)
+				sText := sText "`nColor Found: " oColor
+			
+				MoveToPixel(oSelect_WinChecker)				
+				sleep, 500			
+			}
 			return 0
 		}
 		
@@ -824,6 +865,44 @@ Loop_GemRuns()
 			oListScroll_Checker.X 		:= list_top_x
 			oListScroll_Checker.Y 		:= list_top_y
 			oListScroll_Checker.Color_1 := list_top_c1
+		}	
+		
+		;move mouse to a location inside the Adventure Select Window
+		nX := ((MW_Find_L + MW_Find_R) / 2)
+		nY := ((MW_Find_T + MW_Find_B) / 2)
+		MouseMove, %nX%, %nY%
+		
+		ctr := 0
+		bIsNotAtTop := CheckPixel(oListScroll_Checker)
+		while (bIsNotAtTop and ctr < 50)
+		{
+			MouseClick, WheelUp
+			
+			bIsNotAtTop := CheckPixel(oListScroll_Checker)
+			
+			if (bIsNotAtTop)
+				sleep, 50
+				
+			ctr := ctr + 1
+		}
+		;failed to verify list is scrolled to top
+		if (bIsNotAtTop)
+		{
+			if (gDebug)
+			{
+				sText := "Failed to ensure list is scrolled to top"
+		
+				PixelGetColor, oColor, oListScroll_Checker.X, oListScroll_Checker.Y, RGB
+			
+				sText := sText "`nSearching For: " Format("0x{:X}", oListScroll_Checker.Color_1)
+				sText := sText "`nColor Found: " oColor
+				MoveToPixel(oListScroll_Checker)
+				
+				MsgBox, % sText				
+				sleep, 500		
+			}
+			;not exitting out at this time as its still possible to find the MadWizard adventure
+			;return 0
 		}
 		
 		;mw adventure select
@@ -838,21 +917,6 @@ Loop_GemRuns()
 			oAdventureSelect.HasFound 	:= -1
 			oAdventureSelect.FoundX 	:= ""
 			oAdventureSelect.FoundY		:= ""
-		}
-		
-		nX := ((MW_Find_L + MW_Find_R) / 2)
-		nY := ((MW_Find_T + MW_Find_B) / 2)
-		MouseMove, %nX%, %nY%
-		
-		bIsNotAtTop := CheckPixel(oListScroll_Checker)
-		while (bIsNotAtTop)
-		{
-			MouseClick, WheelUp
-			
-			bIsNotAtTop := CheckPixel(oListScroll_Checker)
-			
-			if (bIsNotAtTop)
-				sleep, 50
 		}
 		
 		if (oAdventureSelect.HasFound = 1)
@@ -879,13 +943,19 @@ Loop_GemRuns()
 			}
 			else
 			{
-				MsgBox, Error Failed to find Mad Wizard in the Select List
+				sText := "Error Failed to find Mad Wizard in the Select List`n"
+				sText := sText "On Close will trace the area its searching for the Mad Wizard's Eye"
+				MsgBox, % sText
+		
+				TestTraceBox(oAdventureSelect)
+				
+				sleep, 500		
 				return 0
 			}
 		}
-		;Mad Wizard should now be selected in displayed in the Right Side of window
+		;Mad Wizard should now be selected and displayed in the Right Side of window
 		
-		;ms adventure start
+		;mw adventure start
 		if (!oAdventureStart)
 		{
 			oAdventureStart := {}
@@ -899,33 +969,40 @@ Loop_GemRuns()
 			oAdventureStart.FoundY		:= ""
 		}	
 		
-		if (oAdventureStart.HasFound = 1)
-		{
-			foundX := oAdventureStart.FoundX
-			foundY := oAdventureStart.FoundY
-			
-			MouseClick, L, foundX, foundY
-			return 1
-		}
-		else
+		if (oAdventureStart.HasFound != 1)
 		{
 			if (FindPixel(oAdventureStart, foundX, foundY))
 			{
 				oAdventureStart.HasFound := 1
 				oAdventureStart.FoundX := foundX
-				oAdventureStart.FoundY := foundY
-				
-				MouseClick, L, foundX, foundY
-				return 1
+				oAdventureStart.FoundY := foundY	
+			}		
+		}
+		
+		if (oAdventureStart.HasFound = 1)
+		{
+			foundX := oAdventureStart.FoundX
+			foundY := oAdventureStart.FoundY
+			
+			if (gDebug)
+			{
+				MouseMove, foundX, foundY, 5
 			}
 			else
 			{
-				;MsgBox, Error failed to find Adventure Start Button
-				return 0
+				MouseClick, L, foundX, foundY
 			}
+			return 1
 		}
+		else
+		{
+			sText := "Error failed to find Adventure Start Button`n"
+			sText := sText "On Close will trace the area its searching for the Blue Start Button"
+			MsgBox, % sText
 		
-		return 0
+			TestTraceBox(oAdventureStart)
+			return 0
+		}		
 	}
 }	
 
@@ -939,10 +1016,10 @@ Loop_GemRuns()
 			return 0
 		
 		;wait for 1st mob to enter screen - wait upto 1min before Fails
-		if (FindFirstMob())
+		if (FindMob())
 		{
 			;continue script
-			sleep, 100			
+			sleep, 100
 		}
 		else
 		{
@@ -951,10 +1028,7 @@ Loop_GemRuns()
 			
 		;Ensure AutoProgress off to minimize issues with Specialization Windows getting stuck open
 		;NOTE: spamming Send, {Right} to manage level progression
-		EnableAutoProgress()
-		
-		;Place the Set Number Familiars
-		DoFamiliars(gFamiliarCount)
+		DisableAutoProgress()		
 			
 		bContinueRun := 1
 		gLevel_Number := 1
@@ -970,11 +1044,7 @@ Loop_GemRuns()
 							
 				UpdateToolTip()
 				
-				if (gHR_Enabled and gLevel_Number > nHR_CurrentLimit)
-				{
-					bContinueRun := 0
-				}
-				else if (!gHR_Enabled and gLevel_Number > nMax_Level)
+				if (gLevel_Number > nMax_Level)
 				{
 					bContinueRun := 0
 				}			
@@ -1001,16 +1071,33 @@ Loop_GemRuns()
 		}
 		
 		;wait for up to 5 second with 4 checks per second for the Target Pixel to show
-		if (!WaitForPixel(oAdventureWindowCheck, wait_time))
+		bFound := WaitForPixel(oAdventureWindowCheck, wait_time)
+		
+		if (gDebug)
 		{
-			;ShowToolTip("ERROR: Failed to find Adventure Window in a Timely Manner.")
-			return 0
-		}
-		return 1
+			if (bFound)
+			{
+				sText := "Success: Found Pixel for the Adventure Window."
+			}
+			else
+			{
+				sText := "ERROR: Failed to find Adventure Window in a Timely Manner."			
+			}
+		
+			PixelGetColor, oColor, adventure_dps_x, adventure_dps_y, RGB
+			
+			sText := sText "`nSearching For: " Format("0x{:X}", oAdventureWindowCheck.Color_1) " or " Format("0x{:X}", oAdventureWindowCheck.Color_2)
+			sText := sText "`nColor Found: " oColor
+			
+			MouseMove, adventure_dps_x, adventure_dps_y
+			
+			MsgBox, % sText
+		}		
+		return bFound
 	}
 	
 		global oMobName := ""
-	FindFirstMob()
+	FindMob()
 	{
 		if (!gMobName)
 		{
@@ -1022,15 +1109,39 @@ Loop_GemRuns()
 			oMobName.Color_1 := mob_area_C
 		}
 		
-		bFound := 0		
-		;NOTE: WaitForPixel() -- default performs search 4 times a second for 1 minute (240 times over 1 minute)
-		bFound := WaitForFindPixel(oMobName, outX, outY)
+		bFound := 0
+		if (gDebug)
+		{
+			;while debugging only wait 10 seconds
+			bFound := WaitForFindPixel(oMobName, outX, outY, 10000)
+		}
+		else
+		{
+			;NOTE: WaitForPixel() -- default performs search 4 times a second for 1 minute (240 times over 1 minute)
+			bFound := WaitForFindPixel(oMobName, outX, outY)
+		}
+		
+		if (gDebug)
+		{
+			if (bFound)
+			{
+				sText := "Success: Found some mobs`n"
+			}
+			else
+			{
+				sText := "Error: Failed to find mobs in time`n"				
+			}
+			
+			sText := sText "On Close will trace the Search Area "
+			MsgBox, % sText
+			TestTraceBox(oMobName)
+		}
 		
 		return bFound	
 	}
 	
 		global oAutoProgress := ""
-	EnableAutoProgress()
+	DisableAutoProgress()
 	{
 		if (!oAutoProgress)
 		{
@@ -1040,16 +1151,30 @@ Loop_GemRuns()
 			oAutoProgress.Color_1 	:= autoprogress_c1
 		}
 		
-		;checks against White Color
+		;checks against Green Color
 		if (CheckPixel(oAutoProgress))
-		{
-			;Auto Progress is off .. transitions handled by Right Arrow Spamming
-		}
-		else
 		{
 			;disable AutoProgress if on
 			Send, g
+		}
+		else
+		{
+			;Auto Progress is off .. transitions handled by Right Arrow Spamming			
 		}	
+		
+		if (gDebug)
+		{
+			sText := "Returning Auto-Progess Pixel Info"
+		
+			PixelGetColor, oColor, autoprogress_x, autoprogress_y, RGB
+			
+			sText := sText "`nSearching For: " Format("0x{:X}", oAutoProgress.Color_1)
+			sText := sText "`nColor Found: " oColor
+			
+			MouseMove, autoprogress_x, autoprogress_y						
+			MsgBox, % sText
+			sleep, 500			
+		}		
 	}	
 
 	DoLevel(nLevel_Number)
@@ -1057,13 +1182,18 @@ Loop_GemRuns()
 		;new run Level 1
 		if (nLevel_Number = 1)
 		{
+			sleep, 1000
+			
+			Send, %gFormation%
+			sleep, 100
+						
 			;ensure roster is scrolled to left (should be for new run)			
 			ScrollRosterLeft()
 			
 			;sweep till Gold is picked up
 			if(gFamiliarCount < 3)
 			{
-				;sweep mob arae till Champ1's level up button is green
+				;sweep mob area till Champ1's level up button is green
 				while (!CheckPixel(gRosterButton))
 				{
 					MouseSweep("UD")
@@ -1076,10 +1206,7 @@ Loop_GemRuns()
 				;took too long to find the Green ClickDamageButton - reset and try again
 				;ToolTip, % "Failed to find the Click Damage Button", 50, 300, 10
 				return 0			
-			}
-			
-			Send, %gFormation%
-			sleep, 100
+			}			
 			
 			;SPECIAL LEVELING ON z1
 			DoEarlyLeveling()			
@@ -1237,24 +1364,42 @@ Loop_GemRuns()
 		}
 		
 		bFound := 0		
-		;NOTE: WaitForFindPixel_Moving() -- default 4 times a second for 1 minute (240 times over 1 minute)
-		if (WaitForFindPixel_Moving(oPixReset_Complete, outX, outY))
+		if (oPixReset_Complete.HasFound = 1)
 		{
-			;NOTE: this will be tend to be in the upper left corner (just move down and right a bit)
-			oClickPixel := {}
-			oClickPixel.X := outX + 15
-			oClickPixel.Y := outY + 15
-			
-			bFound := 1
-			ClickPixel(oClickPixel)		
+			if (WaitForPixel(oPixReset_Complete))
+			{
+				bFound := 1
+				ClickPixel(oPixReset_Complete)
+			}
 		}
+		else
+		{
+			;NOTE: WaitForFindPixel_Moving() -- default 4 times a second for 1 minute (240 times over 1 minute)
+			if (WaitForFindPixel_Moving(oPixReset_Complete, outX, outY))
+			{
+				;NOTE: this will be tend to be in the upper left corner (just move down and right a bit)
+				oPixReset_Complete.X := outX + 15
+				oPixReset_Complete.Y := outY + 15
+				
+				PixelGetColor, oColor, oPixReset_Complete.X, oPixReset_Complete.Y, RGB
+				oPixReset_Complete.Color_1 := oColor
+				oPixReset_Complete.HasFound := 1
+				
+				bFound := 1
+				ClickPixel(oPixReset_Complete)		
+			}
+		}
+		;wait up to 30sec to click skip any longer it'll naturally go away
+		if (bFound and WaitForPixel(oPixReset_Skip, 30000))
+		{
+			ClickPixel(oPixReset_Skip)
+		}	
 		
 		if (bFound and WaitForPixel(oPixReset_Continue))
 		{
-			bFound := 2
 			ClickPixel(oPixReset_Continue)	
 		}
-		return bFound
+		return
 	}
 
 		gTransitionPixel_Left := ""
@@ -1444,7 +1589,10 @@ Loop_GemRuns()
 		{
 			ScrollRosterLeft()
 			
-			ClickPixel(gRosterButton, "MAX")
+			ClickPixel := {}
+			ClickPixel.X := 220
+			ClickPixel.Y := 690
+			ClickPixel(ClickPixel, "MAX")
 			return
 		}
 		
@@ -1523,7 +1671,7 @@ Loop_GemRuns()
 			return
 		}
 			
-		nX := gRosterButton.X + (gRosterButton.Spacing * champ_number)
+		nX := gRosterButton.X + (gRosterButton.Spacing * (champ_number - 1))
 		nY := gRosterButton.Y
 		
 		;get a fresh copy of ClickDamageButton (so dont alter values of the Original Object)
@@ -1598,18 +1746,42 @@ Loop_GemRuns()
 		nX := gWindowSettings.Width / 2
 		nY := roster_y - 20
 		
-		bScrollRequired := !CheckPixel(gLeftRosterPixel)
+		bScrollRequired := !CheckPixel(gLeftRosterPixel)		
 		if (bScrollRequired)
 		{		
 			MouseMove, nX, nY
 			sleep, 100
 		}
 		
-		while (bScrollRequired)
+		ctr := 0
+		while (bScrollRequired and ctr < 20)
 		{
 			MouseClick, WheelUp, nX, nY
 			bScrollRequired := !CheckPixel(gLeftRosterPixel)
+			ctr := ctr + 1
 			sleep, 5
+		}
+		
+		if (gDebug)
+		{
+			if (bScrollRequired)
+			{
+				sText := "Error: Failed to find Pixel to Stop the Scroll (should be Non-Critical)"
+			}
+			else
+			{			
+				sText := "Success: Found the Pixel to Stop the Scroll"
+			}
+			
+			PixelGetColor, oColor, gLeftRosterPixel.X, gLeftRosterPixel.Y, RGB
+			
+			sText := sText "`n`nSearching For: " Format("0x{:X}", gLeftRosterPixel.Color_1)
+			sText := sText "`nColor Found: " oColor
+			sText := sText "`n`nScrolled Roster " ctr " Times"
+			
+			MoveToPixel(gLeftRosterPixel)		
+			
+			MsgBox, % sText
 		}
 	}
 
@@ -1670,65 +1842,6 @@ Loop_GemRuns()
 		}
 		
 		return 0	
-	}
-}
-
-;Familiar functions
-{
-	DoFamiliars(fam_count)
-	{
-		if (fam_count > 6)
-		{
-			fam_count := 6
-		}
-		
-		if (gAllowFamiliarFlashes = 1)
-		{
-			loop, %fam_count%
-			{
-				nX := fam_%A_Index%_x
-				nY := fam_%A_Index%_y
-			
-				Send, {F down}
-				
-				;ensure background overlay is showing
-				ctr := 0
-				while(!AdventureWindow_Check() and ctr < 2)
-				{
-					ctr := ctr + 1
-				}
-				
-				MouseMove, nX, nY
-				sleep, 50
-				Click
-				sleep, 50
-				Send, {F}
-			}			
-		}
-		else
-		{			
-			Send, {F down}
-			
-			;ensure background overlay is showing
-			ctr := 0
-			while(!AdventureWindow_Check() and ctr < 2)
-			{
-				ctr := ctr + 1
-			}
-			
-			loop, %fam_count%
-			{
-				nX := fam_%A_Index%_x
-				nY := fam_%A_Index%_y
-			
-				MouseMove, nX, nY
-				sleep, 50
-				Click
-				sleep, 50
-			}		
-			Send, {F}
-		}
-		return
 	}
 }
 
@@ -2031,309 +2144,194 @@ Loop_GemRuns()
 		nW := gWindowSettings.Width
 		nH := gWindowSettings.Height
 		
-		sText :=  "Window Size" "`nX, Y: " nX ", " nY "`nW,H: " nW ", " nH
+		sText :=  "Window Size`nTop-Left: " nX ", " nY "`nWindow W,H: " nW ", " nH "`nScreen W,H: "   A_ScreenWidth ", "   A_ScreenHeight
 		MsgBox, % sText
 		return
 	}
 
-	TestFindWorldMap()
+	CheckRosterButton1()
 	{
-		oCornerPixel := {}
-		oCornerPixel.X 			:= worldmap_favor_x
-		oCornerPixel.Y 			:= worldmap_favor_y	
-		oCornerPixel.Color_1 	:= worldmap_favor_c1	
-		oCornerPixel.Color_2 	:= worldmap_favor_c2
-	
-		sText := ""
-		if (CheckPixel(oCornerPixel))
-		{
-			sText := "Success: You are currently on the World Map"
-		}
-		else
-		{
-			sText := "Error: Could not determine if you are on the World Map"
-		}
-		
-		MouseMove, worldmap_favor_x, worldmap_favor_y
-		sleep, 500	
-		
-		MsgBox, % sText		
-	}
-
-	TestFindPatron()
-	{
-		oPatron_NP := {}
-		oPatron_NP.X 		:= patron_X
-		oPatron_NP.Y 		:= patron_Y
-		oPatron_NP.Color_1 	:= patron_NP_C
-		
-		oPatron_M := {}
-		oPatron_M.X 		:= patron_X
-		oPatron_M.Y 		:= patron_Y
-		oPatron_M.Color_1 	:= patron_M_C
-		
-		oPatron_V := {}
-		oPatron_V.X 		:= patron_X
-		oPatron_V.Y 		:= patron_Y
-		oPatron_V.Color_1 	:= patron_V_C
-		
-		if (CheckPixel(oPatron_NP))
-		{
-			MsgBox, Current Patron: NONE
-			return
-		}
-		if (CheckPixel(oPatron_M))
-		{	
-			MsgBox, Current Patron: Mirt
-			return
-		}
-		if (CheckPixel(oPatron_V))
-		{
-			MsgBox, Current Patron: Vajra
-			return
-		}
-		MsgBox, ERROR: Failed to determine correct Patron
-	}
-	
-	TestFindTown()
-	{
-		if (FindTown(foundX, foundY))
-		{
-		ToolTip, % "GoTo -- X,Y: " foundX "," foundY, 50, 250, 4
-			sleep, 500
-			MouseMove, foundX, foundY
-		}
-		else
-		{
-			ToolTip, Failed, 50, 250, 2
-		}
-	}
-	
-	TestTownLocations()
-	{
-		;town_3
-		oPix3 := {}
-		oPix3.StartX 	:= town3_L 
-		oPix3.EndX 		:= town3_R
-		oPix3.StartY 	:= town3_T
-		oPix3.EndY 		:= town3_B
-		oPix3.Color_1 	:= town3_C
-		
-		;town2
-		oPix2 := {}
-		oPix2.StartX 	:= town2_L 
-		oPix2.EndX 		:= town2_R
-		oPix2.StartY 	:= town2_T
-		oPix2.EndY 		:= town2_B
-		oPix2.Color_1 	:= town2_C
-		
-		;town1
-		oPix1 := {}
-		oPix1.StartX 	:= town1_L 
-		oPix1.EndX 		:= town1_R
-		oPix1.StartY 	:= town1_T
-		oPix1.EndY 		:= town1_B
-		oPix1.Color_1 	:= town1_C
-		
-		
-		if (FindPixel(oPix3, foundX, foundY))
-		{
-			sText := sText "SUCCESS: Found Town 3`n"
-			MouseMove, foundX, foundY
-			sleep, 250
-		}
-				
-		if (FindPixel(oPix2, foundX, foundY))
-		{
-			sText := sText "SUCCESS: Found Town 2`n"
-			MouseMove, foundX, foundY
-			sleep, 250
-		}
-		
-		if (FindPixel(oPix1, foundX, foundY))
-		{
-			sText := sText "SUCCESS: Found Town 1`n"
-			MouseMove, foundX, foundY
-			sleep, 250
-		}
-		
-		if (sText)
-		{
+			if (CheckPixel(gRosterButton))
+			{
+				sText := "INFO: Champ1 is Green"
+			}
+			else
+			{			
+				sText := "INFO: Champ1 is not Green"
+			}
+			
+			PixelGetColor, oColor, gRosterButton.X, gRosterButton.Y, RGB
+			
+			sText := sText "`n`nSearching For: " Format("0x{:X}", gRosterButton.Color_1) " or " Format("0x{:X}", gRosterButton.Color_2)
+			sText := sText "`nColor Found: " oColor
+			sText := sText "`n`nScrolled Roster " ctr " Times"
+			
+			MoveToPixel(gRosterButton)		
+			
 			MsgBox, % sText
-		}
-		else
-		{
-			MsgBox, % "ERROR: Failed to find any towns"
-		}
-		/*
-		nLeft :=	oPix1.StartX
-		nRight :=	oPix1.EndX
-		nTop := 	oPix1.StartY
-		nBottom :=	oPix3.EndY	
-			
-	
-		MouseMove, nLeft, nTop, 15
-		sleep, 500
-		MouseMove, nRight, nTop, 15
-		sleep, 500
-		MouseMove, nRight, nBottom, 15
-		sleep, 500
-		MouseMove, nLeft, nBottom,15 
-		sleep, 500
-		MouseMove, nLeft, nTop, 15
-		sleep, 500
-		*/
-
-		return
 	}
 	
-	TestAdventureSelect()
+	TestRosterButtons()
 	{
-		;ensure adventure select window is open
-		oSelect_WinChecker := {}
-		oSelect_WinChecker.X := select_win_x
-		oSelect_WinChecker.Y := select_win_y
-		oSelect_WinChecker.Color_1 := select_win_c1
-	
-		ctr := 0
-		;check 10 times in 5sec intervals for the Adventure Select Window show;
-		;server lag can cause issues between clicking the town and selector window displaying
-		while (!bFound and ctr < 10)
-		{
-			;open adventure select window
-			Click %town_x%, %town_y%				; Click the town button for mad wizard adventure
-			Sleep 100
-			
-			;wait for 10 seconds for Selector window to show
-			if (WaitForPixel(oSelect_WinChecker, 5000))
-			{
-				bFound := 1
-			}
-			
-			ctr := ctr + 1
-		}
-		
-		ctr := 0
-			
-		if (!bFound)
-		{
-			;failed to open the selector window in a timely manner
-			MsgBox, ERROR: Failed to find the Adventure Select Window 
-		}
-		
-		;ensure adventure select window is scrolled to top
-		oListScroll_Checker := {}
-		oListScroll_Checker.X := list_top_x
-		oListScroll_Checker.Y := list_top_y
-		oListScroll_Checker.Color_1 := list_top_c1
-		
-		;mw adventure select
-		oPix1 := {}
-		oPix1.StartX 	:= MW_Find_L 
-		oPix1.EndX 		:= MW_Find_R 
-		oPix1.StartY 	:= MW_Find_T 
-		oPix1.EndY 		:= MW_Find_B 
-		oPix1.Color_1	:= MW_Find_C
-		
-		nX := ((MW_Find_L + MW_Find_R) / 2)
-		nY := ((MW_Find_T + MW_Find_B) / 2)
-		MouseMove, %nX%, %nY%
-		
-		bIsNotAtTop := CheckPixel(oListScroll_Checker)
-		while (bIsNotAtTop)
-		{
-			MouseClick, WheelUp
-			
-			bIsNotAtTop := CheckPixel(oListScroll_Checker)
-			
-			if (bIsNotAtTop)
-			{
-				sleep, 50
-			}
-		}
-		CenterMouse()
-		sleep, 250		
-		
-		if (FindPixel(oPix1, foundX, foundY))
-		{
-			ToolTip, % "Success Found It at" foundX "," foundY, 50, 100, 5
-			MouseClick, Left, %foundX%,%foundY%
-			sleep, 500
-		}
-		else
-		{
-			MsgBox, Error Failed to find Mad Wizard in the Select List
-			return
-		}
-		;Mad Wizard should be in window at this position
-		
-		;ms adventure start
-		oPix2 := {}
-		oPix2.StartX 	:= MW_Start_L 
-		oPix2.EndX 		:= MW_Start_R
-		oPix2.StartY 	:= MW_Start_T
-		oPix2.EndY 		:= MW_Start_B
-		oPix2.Color_1 	:= MW_Start_C
-		
-		
-		if (FindPixel(oPix2, foundX, foundY))
-		{
-			MouseMove, foundX, foundY
-		}
-		else
-		{
-			MsgBox, Error failed to find Adventure Start Button
-		}
-		
-		return
-	}
-	
-	TestAutoProgress()
-	{
-		nX := autoprogress_x
-		nY := autoprogress_y
+		nX := roster_x
+		nY := roster_y
 		spacing := roster_spacing
-				
+		
+		PixelGetColor, oColor1, nX, nY, RGB
+			
 		MouseMove, nX, nY
 		sleep, 1000	
 		
 		PixelGetColor, oColor, nX, nY, RGB
-		ToolTip, % "Auto Progress -- Color: " oColor , 50, 100, 5
+		ToolTip, % "Champ Num: 1 -- Color Before: " oColor1 " Color After: " oColor , 50, 100, 5
 				
-	}
-
-	TestFindMob()
-	{
-		pixWhite := {}
-		pixWhite.StartX := mob_name_L
-		pixWhite.EndX 	:= mob_name_R
-		pixWhite.StartY := mob_name_T
-		pixWhite.EndY 	:= mob_name_B
-		pixWhite.Color_1 := mob_name_C
-		
-		;trace the search box
-		MouseMove, pixWhite.StartX, pixWhite.StartY, 25
-		MouseMove, pixWhite.EndX, pixWhite.StartY, 25
-		MouseMove, pixWhite.EndX, pixWhite.EndY, 25
-		MouseMove, pixWhite.StartX, pixWhite.EndY, 25
-		MouseMove, pixWhite.StartX, pixWhite.StartY, 25
-		
-		;NOTE: WaitForPixel() -- default performs search 4 times a second for 1 minute (240 times over 1 minute)
-		if (WaitForFindPixel(pixWhite, outX, outY))
+		loop, 8
 		{
-			bFound := 1
+			nX := roster_x + (A_Index * spacing)
+			
+			PixelGetColor, oColor1, nX, nY, RGB
+			
+			MouseMove, nX, nY
+			sleep, 1000	
+		
+			PixelGetColor, oColor, nX, nY, RGB
+			ToolTip, % "Champ Num: " (A_Index + 1)  " -- Color Before: " oColor1 " Color After: " oColor , 50, 100 + (A_Index * 25), (5 + A_Index)
 		}
+		return	
+	}
+	
+	TestUpgradeButtons()
+	{
 		
-		if (bFound)
+		nX := roster_x + roster_upoff_x
+		nY := roster_y + roster_upoff_y
+		spacing := roster_spacing
+		
+		PixelGetColor, oColor1, nX, nY, RGB
+			
+		MouseMove, nX, nY
+		sleep, 1000	
+		
+		PixelGetColor, oColor, nX, nY, RGB
+		ToolTip, % "Champ Num: 1 -- Color Before: " oColor1 " Color After: " oColor , 50, 100, 5
+				
+		
+		loop, 8
 		{
-			MsgBox, SUCCESS: Found a Mob's Name
+			nX := roster_x + (A_Index * spacing) + roster_upoff_x			
+			
+			PixelGetColor, oColor1, nX, nY, RGB
+			
+			MouseMove, nX, nY
+			sleep, 1000	
+		
+			PixelGetColor, oColor, nX, nY, RGB
+			ToolTip, % "Champ Num: " (A_Index + 1) " -- Color Before: " oColor1 " Color After: " oColor , 50, 100 + (A_Index * 25), (5 + A_Index)
+		}
+		return	
+	}
+	
+	TestSpecializationWinClose()
+	{
+		if (FindPixel(gSpecialWindowClose, foundX, foundY))
+		{
+			sText := "Success found Close Button"			
 		}
 		else
 		{
-			MsgBox, ERROR: Failed to find a Mob's Name in time
+			sText := "ERROR: Failed to Find Close Button"
+			sText := sText "`nTopLeft: " gSpecialWindowClose.StartX ", " gSpecialWindowClose.StartY
+			sText := sText "`nBottomRight:" gSpecialWindowClose.EndX ", " gSpecialWindowClose.EndY			
 		}
+			
+		TestTraceBox(gSpecialWindowClose)
+		
+		;MouseMove, gWindowSettings.Width, gWindowSettings.Height, 10
+		;sleep, 5000
+		MsgBox, % sText
+		return
 	}
+	TestSpecializationSelectButtons()
+	{
+		if (FindPixel(gSpecialWindowSearch, foundX, foundY))
+		{
+			sText := "Success found 1st Green Button"
+		}
+		else
+		{
+			sText := "ERROR: Failed to find a Green Special Select Button"
+			sText := sText "`nTopLeft: " gSpecialWindowSearch.StartX ", " gSpecialWindowSearch.StartY
+			sText := sText "`nBottomRight:" gSpecialWindowSearch.EndX ", " gSpecialWindowSearch.EndY	
+		}
+		TestTraceBox(gSpecialWindowSearch)
+		
+		MsgBox, % sText
+		return
+	}
+	
+	TestResetComplete()
+	{
+		if (WaitForFindPixel_Moving(oPixReset_Complete, outX, outY))
+		{
+			sText := "Success found the Complete Button"
+		}
+		else
+		{
+			sText := "ERROR: Failed to find a Complete Button"
+			sText := sText "`nTopLeft: " oPixReset_Complete.StartX ", " oPixReset_Complete.StartY
+			sText := sText "`nBottomRight:" oPixReset_Complete.EndX ", " oPixReset_Complete.EndY	
+		}
+		TestTraceBox(oPixReset_Complete)
+		
+		MouseMove, (outX + 15), (outY + 15), 5
+		
+		MsgBox, % sText
+		return
+	}
+	TestResetSkip()
+	{
+		if (WaitForPixel(oPixReset_Skip, 1000))
+		{
+			sText := "Success found the Skip Button"
+		}
+		else
+		{
+			sText := "ERROR: Failed to find a Skip Button"
+			
+			PixelGetColor, oColor, oPixReset_Skip.X, oPixReset_Skip.Y, RGB
+			
+			sText := sText "`nSearching For: " Format("0x{:X}", oPixReset_Skip.Color_1) " or " Format("0x{:X}", oPixReset_Skip.Color_2)
+			sText := sText "`nColor Found: " oColor			
+		}
 
+		MoveToPixel(oPixReset_Skip)				
+		
+		MsgBox, % sText
+		return	
+	}
+	TestResetContinue()
+	{
+		if (WaitForPixel(oPixReset_Continue, 1000))
+		{
+			sText := "Success found the Continue Button"
+		}
+		else
+		{
+			sText := "ERROR: Failed to find a Continue Button"
+			
+			PixelGetColor, oColor, oPixReset_Continue.X, oPixReset_Continue.Y, RGB
+			
+			sText := sText "`nSearching For: " Format("0x{:X}", oPixReset_Continue.Color_1) " or " Format("0x{:X}", oPixReset_Continue.Color_2)
+			sText := sText "`nColor Found: " oColor			
+		}
+
+		MoveToPixel(oPixReset_Continue)				
+		
+		MsgBox, % sText
+		return
+	}
+	
+	
 	TestReadSpec(nChampNumber)
 	{
 		if(gFormation != -1)
@@ -2393,55 +2391,6 @@ Loop_GemRuns()
 		MsgBox,% sval
 	}
 	
-	TestRosterButtons()
-	{
-		nX := roster_x
-		nY := roster_y
-		spacing := roster_spacing
-		
-		PixelGetColor, oColor1, nX, nY, RGB
-			
-		MouseMove, nX, nY
-		sleep, 1000	
-		
-		PixelGetColor, oColor, nX, nY, RGB
-		ToolTip, % "Champ Num: Click DMG -- Color Before: " oColor1 " Color After: " oColor , 50, 100, 5
-				
-		loop, 9
-		{
-			nX := roster_x + (A_Index * spacing)
-			
-			PixelGetColor, oColor1, nX, nY, RGB
-			
-			MouseMove, nX, nY
-			sleep, 1000	
-		
-			PixelGetColor, oColor, nX, nY, RGB
-			ToolTip, % "Champ Num: " A_Index " -- Color Before: " oColor1 " Color After: " oColor , 50, 100 + (A_Index * 25), (5 + A_Index)
-		}
-		return	
-	}
-
-	TestUpgradeButtons()
-	{
-		spacing := roster_spacing
-		
-		loop, 9
-		{
-			nX := roster_x + (A_Index * spacing) + roster_upoff_x
-			nY := roster_y + roster_upoff_y
-			
-			PixelGetColor, oColor1, nX, nY, RGB
-			
-			MouseMove, nX, nY
-			sleep, 1000	
-		
-			PixelGetColor, oColor, nX, nY, RGB
-			ToolTip, % "Champ Num: " A_Index " -- Color Before: " oColor1 " Color After: " oColor , 50, 100 + (A_Index * 25), (5 + A_Index)
-		}
-		return	
-	}
-
 	TestTransition()
 	{
 		bResult := CheckTransition()
@@ -2469,51 +2418,10 @@ Loop_GemRuns()
 		return
 	}
 	
-	TestSpecializationWinClose()
-	{
-		if (FindPixel(gSpecialWindowClose, foundX, foundY))
-		{
-			ToolTip, % "Success found Close Button", 50, 100, 5
-			return		
-		}
-			
-		nLeft :=	gSpecialWindowClose.StartX
-		nRight :=	gSpecialWindowClose.EndX
-		nTop := 	gSpecialWindowClose.StartY
-		nBottom :=	gSpecialWindowClose.EndY	
-			
-		MouseMove, nLeft, nTop, 15
-		sleep, 500
-		MouseMove, nRight, nTop, 15
-		sleep, 500
-		MouseMove, nRight, nBottom, 15
-		sleep, 500
-		MouseMove, nLeft, nBottom,15 
-		sleep, 500
-		MouseMove, nLeft, nTop, 15
-		sleep, 500
-		
-		return
-	}
 	
-	TestResetContinue()
-	{
-		;TestTraceBox(oPixReset_Complete)
-		
-		bFound := 0		
-		;NOTE: WaitForFindPixel_Moving() -- default 4 times a second for 1 minute (240 times over 1 minute)
-		if (WaitForFindPixel_Moving(oPixReset_Complete, outX, outY))
-		{
-			;NOTE: this will be tend to be in the upper left corner (just move down and right a bit)
-			oClickPixel := {}
-			oClickPixel.X := outX + 15
-			oClickPixel.Y := outY + 15
-			
-			bFound := 1
-			MoveToPixel(oClickPixel)
-			;ClickPixel(oClickPixel)		
-		}		
-	}
+	
+	
+	
 	
 	TestFindPixel()
 	{
@@ -2556,32 +2464,7 @@ Loop_GemRuns()
 		return
 	}
 
-	TestSpecializationSelectButtons()
-	{
-		if (FindPixel(gSpecialWindowSearch, foundX, foundY))
-		{
-			ToolTip, % "Success found 1st Green Button", 50, 100, 5
-			;return		
-		}
-			
-		nLeft :=	gSpecialWindowSearch.StartX
-		nRight :=	gSpecialWindowSearch.EndX
-		nTop := 	gSpecialWindowSearch.StartY
-		nBottom :=	gSpecialWindowSearch.EndY	
-			
-		MouseMove, nLeft, nTop, 15
-		sleep, 500
-		MouseMove, nRight, nTop, 15
-		sleep, 500
-		MouseMove, nRight, nBottom, 15
-		sleep, 500
-		MouseMove, nLeft, nBottom,15 
-		sleep, 500
-		MouseMove, nLeft, nTop, 15
-		sleep, 500
-		
-		return
-	}
+	
 
 	CheckPixelInfo(oPixel)
 	{

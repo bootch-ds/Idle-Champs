@@ -2,6 +2,17 @@
 ******************************************************
 	Change Log:
 ******************************************************
+	Version - 200301 (03/01/20)
+		update: settings to account for latest UI changes from CNE
+		update: changed how pixels are determined - now uses screen size vs window size (ie borders should now be ignored)
+		update: split Settings into a 2 files this will allow the Settings File to be updated and shared without impacting users custom run settings
+			MW_Settings_1280x720.ahk
+			MW_Configuration.ahk
+		update: removed code for High Rollers if needed again in future see version 191020 or earlier
+		update: added debugging code to several functions
+		update: remove code to place familiars (these should now be attached to the Formation being used)
+		modified: roster functions to start looking at Champ1 slot vs ClickDamage button (to prevent issues with Familiars assigned to ClickDamage)
+		
 	Version - 191020 (10/20/19)
 		bug fix: modified how the PriorLeveling and SpecialOption Settings were being determined
 	Version - 191019 (10/19/19)

@@ -18,46 +18,46 @@ there are points where this can be speed up
 ******************************************************
 *	Recent Changes:
 ****************************************************** 
-	Version - 191020 (10/20/19)
-		bug fix: modified how the PriorLeveling and SpecialOption Settings were being determined
+	Version - 200301 (03/01/20)
+		update: settings to account for latest UI changes from CNE
+		update: changed how pixels are determined - now uses screen size vs window size (ie borders should now be ignored)
+		update: split Settings into a 2 files this will allow the Settings File to be updated and shared without impacting users custom run settings
+			MW_Settings_1280x720.ahk
+			MW_Configuration.ahk
+		update: removed code for High Rollers if needed again in future see version 191020 or earlier
+		update: added debugging code to several functions
+		update: remove code to place familiars (these should now be attached to the Formation being used)
+		modified: roster functions to start looking at Champ1 slot vs ClickDamage button (to prevent issues with Familiars assigned to ClickDamage)
+		
 			
 ******************************************************		
 *	WARNINGS/Potential Issues/Recommendations
-******************************************************
-	Potential Issue: 	Having Title Bar turned off will create a shift in the Y values and Scrit wont be able find several Locations (Jadisero)
+******************************************************	
 	Potential Issue:	If bottom IC Window is off screen script may not work properly (thx Cyber Nemesis)
 	Required:			Ensure Level Up Button (bottom left corner) is set to UPG vs x1/10/100 (thx Cyber Nemesis)
 	
 	Warning:			Pausing Script while on Boss Level will throw off the Level Counter 
 						(while script should still work may run an extra level and Leveling Champs/ClickDmg will be out of sync for that run)
 	Wanring:			Typing Chest Codes with Script running may trigger the Formation Override instead of using the Setting assignment
-	Recommended:		Pause Script prior to opening in game windows (store/high rollers/etc)
+	Recommended:		Pause Script prior to opening in game windows (store/inventory/etc)
 	Disclaimer: 		Pixel Colors and Positions may need to be tweaked to run correctly for your system (but this should be a 1 time process)
 	
 ******************************************************	
 *	Script Customizing: (MW_Settings_1280x720.ahk)
 ******************************************************	
-		global nMax_Level 				:= 30	;sets the level that the script will run to for each iteration
-	
+		global nMax_Level 				:= 30	;sets the level that the script will run to for each iteration	
 	
 	******************************************************
 	*	Familiars
 	******************************************************
 		global gFamiliarCount 			:= 6	;number of familiars to use is REQUIRED if have < 3  familiars
 												;NOTE: script handles a MAX of 6 familiars
-		global gAllowFamiliarFlashes 	:= 1	;Values: 1 or 0 <-- default 1
-			Sets whether the "F" Key will be pressed down and up for each Familiar
-			1 will do a seperate Key Press for each familiar being placed => multiple screen flashes when placing familiars
-			0 will hold the "F" key down till all familiars are placed => 2 screen flashes (1 at start and 1 at end of placement)
-			NOTE: if using 0 then may cause secondary issues if game or script crashes without releasing the "F" key
-	
-	
+		
 	******************************************************
 	*	Mouse Behavior
 	******************************************************
 		global gEnableAutoClick 		:= 0	;script will auto-click 10x for 100ms (upto 60 clicks/second)
 		global gEnableMouseSweep 		:= 0	;script will sweep to collect gold/items (also requires gFamiliarCount < 3)
-
 	
 	******************************************************
 	*	Formation to use during GemFarm
@@ -68,7 +68,6 @@ there are points where this can be speed up
 		global gFormation_NP 			:= "Q"	;Values: Q/W/E sets which formation to use when No Patron is Active 	(if changing use capital letters)
 		global gFormation_M 			:= "Q"	;Values: Q/W/E sets which formation to use when Mirt is Active Patron 	(if changing use capital letters)
 		global gFormation_V 			:= "Q"	;Values: Q/W/E sets which formation to use when Vajra is Active Active 	(if changing use capital letters)
-
 
 	******************************************************
 	*	Champ Leveling
@@ -81,8 +80,7 @@ there are points where this can be speed up
 		global gStopChampLeveling		:= 13	;script will stop leveling Champs after this Zone
 		global gAllowF12_Leveling 		:= 0	;Values: 1 or 0 <-- default 1	
 			CRITICAL WARNING: if using F-keys and leveling Slot 12 unless addressed this will SPAM Screenshots
-			To Enable F12 Leveling:	need to set --> gLevelingMethod := "F" and gAllowF12_Leveling := 1
-		
+			To Enable F12 Leveling:	need to set --> gLevelingMethod := "F" and gAllowF12_Leveling := 1		
 
 	******************************************************	
 	*	Early Priority Champ Leveling
@@ -94,7 +92,6 @@ there are points where this can be speed up
 				LevelUp(6, 8) 	;shandie dash1
 				LevelUp(6, 18)	;shandie dash2
 				LevelUp(7, 4)	;minc extra mob
-
 			
 	******************************************************
 	*	Champ Specialization Options
@@ -128,8 +125,7 @@ there are points where this can be speed up
 ******************************************************
 	`		: Pauses the Script
 	F1		: (Help) -- Shows ToolTip with HotKey Info 
-	F2		: starts the script to farm MadWizard to L30
-	F3		: enables High Roller functionality -- (by default) iterates through Levels 50-90 (10 at time) then resets back to L30
+	F2		: starts the script to farm MadWizard to L30	
 	F8		: shows stats for the current script run
 	F9		: Reloads the script
 	Up		: used to increase the Target Level by 10 till next Script Reset/Reload
